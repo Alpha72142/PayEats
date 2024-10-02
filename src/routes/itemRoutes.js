@@ -1,12 +1,17 @@
 const express = require('express');
-const { getItems, updateItemStatus, addItem, deleteItem } = require('../controllers/itemController');
+const {
+    getItems,
+    updateItemStatus,
+    addItem,
+    deleteItem,
+} = require('../controllers/itemController');
 const authMiddleware = require('../middlewares/authMiddleware');
 
 const router = express.Router();
 
-router.get('/items', authMiddleware, getItems);
-router.post('/items/update', authMiddleware, updateItemStatus);
-router.post('/items', authMiddleware, addItem);  // Route for adding items
-router.delete('/items/:itemId', authMiddleware, deleteItem);  // Route for deleting items
+router.get('/', authMiddleware, getItems); // Get all items
+router.post('/', authMiddleware, addItem); // Add new item
+router.put('/status', authMiddleware, updateItemStatus); // Update item status
+router.delete('/:itemId', authMiddleware, deleteItem); // Delete item
 
 module.exports = router;
