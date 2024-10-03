@@ -3,7 +3,6 @@ const User = require('../models/userModel');
 
 const authMiddleware = async (req, res, next) => {
     const token = req.headers['authorization']?.split(' ')[1]; // Assuming Bearer token
-    const email = req.body.email; // Get the email from the request body or headers
 
     if (!token) {
         return res.status(403).json({ message: 'No token provided' });

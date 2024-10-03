@@ -12,21 +12,55 @@ exports.getItems = async (req, res) => {
 };
 
 exports.addItem = async (req, res) => {
-    const { name, status } = req.body; // Ensure this matches your model
+    const { name, price, offerPrice, description, image, status } = req.body; // Ensure these match your model
+
+    // Validate required fields
+    if (!name || !price) {
+        return res.status(400).json({ message: 'Name and price are required' });
+    }
+
+    // Ensure offerPrice can be optional
+    if (offerPrice !== undefined && typeof offerPrice !== 'number') {
+        return res.status(400).json({ message: 'Offer price must be a number or omitted' });
+    }
+
     if (typeof status !== 'boolean') {
         return res.status(400).json({ message: 'Status must be a boolean value' });
     }
     try {
-        await Item.addItem(name, status); // Call the correct function
-        res.status(201).json({ message: 'Item added successfully' });
+        // Check if item with the same name already exists
+        const existingItem = await Item.getItemByName(name);
+        if (existingItem) {
+            return res.status(400).json({ message: 'Item with the same name already exists' });
+        }
+
+        // Add the new item if the name doesn't exist
+        const newItem = await Item.addItem(name, price, offerPrice, description, image, status);
+        res.status(201).json({ message: 'Item added successfully', item: newItem });
     } catch (error) {
         console.error('Error adding item:', error);
         res.status(500).json({ message: 'Server error' });
     }
 };
 
+exports.getItemById = async (req, res) => {
+    const { itemId } = req.params;
+    try {
+        const item = await Item.getItemById(itemId);
+        if (!item) {
+            return res.status(404).json({ message: 'Item not found' });
+        }
+        res.json(item);
+    } catch (error) {
+        console.error('Error fetching item:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 exports.updateItemStatus = async (req, res) => {
     const { itemId, status } = req.body;
+    
+    // Ensure status is a boolean
     if (typeof status !== 'boolean') {
         return res.status(400).json({ message: 'Status must be a boolean value' });
     }
